@@ -1,6 +1,8 @@
 package main
 
-import "time"
+import (
+	"sync"
+)
 
 type Recipient struct {
 	Name  string
@@ -12,9 +14,13 @@ func main() {
 
 	go loadRecipient("emails.csv", recipientChannel)
 
+	var wg sync.WaitGroup
+
 	for workers := 0; workers <= 4; workers++ {
-		go emailWorker(workers, recipientChannel)
+		wg.Add(1)
+		go emailWorker(workers, recipientChannel, &wg)
 	}
 
-	time.Sleep(3 * time.Second)
+	wg.Wait()
+
 }
